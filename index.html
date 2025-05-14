@@ -5,13 +5,12 @@
   <title>YouTube Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- iOS 홈화면용 설정 -->
+  <!-- iOS 홈화면용 설정 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="YouTube Viewer">
   <link rel="apple-touch-icon" href="https://i.imgur.com/jhrbw7u.jpeg">
 
-  <title>YouTube Viewer</title>
   <style>
     html, body {
       margin: 0;
@@ -24,12 +23,9 @@
       background-repeat: no-repeat;
     }
 
-    .button-open {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      width: 20px;
-      height: 20px;
+    .button-open, .button-close {
+      width: 24px;
+      height: 24px;
       background-color: rgba(255, 255, 255, 0.3);
       border: none;
       border-radius: 50%;
@@ -37,8 +33,23 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.4);
     }
 
-    .button-open:hover {
+    .button-open:hover, .button-close:hover {
       background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .button-open {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+    }
+
+    .button-close {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: none;
+      font-weight: bold;
+      color: black;
     }
 
     .video-wrapper {
@@ -57,11 +68,9 @@
 
     .video-header {
       background: #222;
-      color: white;
       padding: 5px;
       cursor: move;
-      font-size: 14px;
-      text-align: right;
+      font-size: 0; /* 텍스트 제거 */
     }
 
     iframe {
@@ -74,16 +83,15 @@
 <body>
 
   <button class="button-open" onclick="promptYouTube()" title="YouTube 열기"></button>
+  <button class="button-close" onclick="closeYouTube()" title="닫기">X</button>
 
   <div id="youtubeWindow" class="video-wrapper" style="display: none;">
-    <div class="video-header">
-      <button onclick="closeYouTube()" style="background:none;color:white;border:none;">X</button>
-    </div>
+    <div class="video-header"></div>
     <iframe id="youtubeFrame" src="" allowfullscreen></iframe>
   </div>
 
   <script>
-    let currentLink = "https://youtu.be/RPMP85FdHJY?si=-INYtz-9ciOiWFDo";
+    let currentLink = "https://youtu.be/RPMP85FdHJY?si=Vz3zmCbSwJMK6i4C";
 
     function promptYouTube() {
       const useOld = confirm("기존 영상 계속 보시겠습니까?");
@@ -112,13 +120,16 @@
     function openYouTube(link) {
       const frame = document.getElementById("youtubeFrame");
       const windowEl = document.getElementById("youtubeWindow");
+      const closeBtn = document.querySelector(".button-close");
       frame.src = link;
       windowEl.style.display = "block";
+      closeBtn.style.display = "block";
     }
 
     function closeYouTube() {
       document.getElementById("youtubeWindow").style.display = "none";
       document.getElementById("youtubeFrame").src = "";
+      document.querySelector(".button-close").style.display = "none";
     }
 
     // 드래그 기능
@@ -159,12 +170,12 @@
       document.removeEventListener("touchend", endDrag);
     }
 
-// 새로고침 방지 (모바일에서 드래그 시)
-document.addEventListener('touchmove', function (e) {
-  if (isDragging) {
-    e.preventDefault();
-  }
-}, { passive: false });
+    // 새로고침 방지 (모바일에서 드래그 시)
+    document.addEventListener('touchmove', function (e) {
+      if (isDragging) {
+        e.preventDefault();
+      }
+    }, { passive: false });
   </script>
 
 </body>
