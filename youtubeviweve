@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- iOS 홈화면용 설정 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="YouTube Viewer">
+  <link rel="apple-touch-icon" href="https://i.imgur.com/jhrbw7u.jpeg">
+
+  <title>YouTube Viewer</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background-image: url('https://i.imgur.com/yHx9MpQ.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .button-open {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 20px;
+      height: 20px;
+      background-color: rgba(255, 255, 255, 0.3);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+
+    .button-open:hover {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .video-wrapper {
+      position: absolute;
+      top: 100px;
+      left: 20px;
+      width: 320px;
+      height: 180px;
+      resize: both;
+      overflow: hidden;
+      background-color: black;
+      border: 2px solid white;
+      border-radius: 8px;
+      z-index: 1000;
+    }
+
+    .video-header {
+      background: #222;
+      color: white;
+      padding: 5px;
+      cursor: move;
+      font-size: 14px;
+      text-align: right;
+    }
+
+    iframe {
+      width: 100%;
+      height: calc(100% - 30px);
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="button-open" onclick="promptYouTube()" title="YouTube 열기"></button>
+
+  <div id="youtubeWindow" class="video-wrapper" style="display: none;">
+    <div class="video-header">
+      <button onclick="closeYouTube()" style="background:none;color:white;border:none;">X</button>
+    </div>
+    <iframe id="youtubeFrame" src="" allowfullscreen></iframe>
+  </div>
+
+  <script>
+    let currentLink = "https://www.youtube.com/embed/dQw4w9WgXcQ";
+
+    function promptYouTube() {
+      const useOld = confirm("기존 영상 계속 보시겠습니까?");
+      if (useOld) {
+        openYouTube(currentLink);
+      } else {
+        const newLink = prompt("YouTube 링크를 입력하세요:");
+        if (newLink) {
+          const embedLink = convertToEmbed(newLink);
+          currentLink = embedLink;
+          openYouTube(embedLink);
+        }
+      }
+    }
+
+    function convertToEmbed(link) {
+      let videoId = '';
+      if (link.includes("watch?v=")) {
+        videoId = link.split("watch?v=")[1].split("&")[0];
+      } else if (link.includes("youtu.be/")) {
+        videoId = link.split("youtu.be/")[1];
+      }
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    function openYouTube(link) {
+      const frame = document.getElementById("youtubeFrame");
+      const windowEl = document.getElementById("youtubeWindow");
+      frame.src = link;
+      windowEl.style.display = "block";
+    }
+
+    function closeYouTube() {
+      document.getElementById("youtubeWindow").style.display = "none";
+    }
+
+    // 드래그 기능
+    const videoWrapper = document.getElementById("youtubeWindow");
+    const header = videoWrapper.querySelector(".video-header");
+
+    let isDragging = false, offsetX, offsetY;
+
+    header.addEventListener("touchstart", startDrag);
+    header.addEventListener("mousedown", startDrag);
+
+    function startDrag(e) {
+      isDragging = true;
+      const touch = e.touches ? e.touches[0] : e;
+      offsetX = touch.clientX - videoWrapper.offsetLeft;
+      offsetY = touch.clientY - videoWrapper.offsetTop;
+
+      document.addEventListener("mousemove", onDrag);
+      document.addEventListener("mouseup", endDrag);
+      document.addEventListener("touchmove", onDrag);
+      document.addEventListener("touchend", endDrag);
+    }
+
+    function onDrag(e) {
+      if (!isDragging) return;
+      const touch = e.touches ? e.touches[0] : e;
+      const left = touch.clientX - offsetX;
+      const top = touch.clientY - offsetY;
+      videoWrapper.style.left = `${left}px`;
+      videoWrapper.style.top = `${top}px`;
+    }
+
+    function endDrag() {
+      isDragging = false;
+      document.removeEventListener("mousemove", onDrag);
+      document.removeEventListener("mouseup", endDrag);
+      document.removeEventListener("touchmove", onDrag);
+      document.removeEventListener("touchend", endDrag);
+    }
+
+// 새로고침 방지 (모바일에서 드래그 시)
+document.addEventListener('touchmove', function (e) {
+  if (isDragging) {
+    e.preventDefault();
+  }
+}, { passive: false });
+  </script>
+
+</body>
+</html>
